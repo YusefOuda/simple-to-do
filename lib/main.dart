@@ -28,10 +28,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var items = new List<TodoItem>();
+
   final _fontSize = 20.0;
+  final myController = new TextEditingController();
+
+  @override
+  void dispose() {
+    myController.dispose();
+    super.dispose();
+  }
 
   void _addTodoItem() {
     setState(() {
+      if (myController.text != null && myController.text.isNotEmpty) {
+        items.add(new TodoItem(text: myController.text));
+        myController.clear();
+      }
       items.removeWhere((i) => i.text == null);
       items.add(new TodoItem());
     });
@@ -50,9 +62,15 @@ class _MyHomePageState extends State<MyHomePage> {
       itemsList = json.decode(prefs.getString("items"));
     } catch (Exception) {
       print('couldnt decode json');
+      setState(() {
+        items.add(new TodoItem());
+      });
       return;
     }
     setState(() {
+      if (itemsList != null && itemsList.length > 0) {
+        items.clear();
+      }
       itemsList.forEach((i) {
         var item = TodoItem.fromJson(i);
         items.add(item);
@@ -75,62 +93,62 @@ class _MyHomePageState extends State<MyHomePage> {
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
-          return new Dismissible(
-            resizeDuration: const Duration(milliseconds: 10),
-            movementDuration: const Duration(milliseconds: 10),
-            background: new Container(color: Colors.blueAccent),
-            onDismissed: (direction) {
-              items.removeAt(index);
-              Scaffold.of(context).showSnackBar(
-                    new SnackBar(
-                      content: new Text('Item dismissed'),
-                      duration: const Duration(milliseconds: 1500),
-                    ),
-                  );
-              _updateItems();
-            },
-            key: new ObjectKey(item),
-            child: item.text != null
-                ? new CheckboxListTile(
-                    title: item.done
-                        ? new Text(
-                            '${item.text}',
-                            style: new TextStyle(
-                              fontSize: _fontSize,
-                              decoration: TextDecoration.lineThrough,
-                              color: Colors.grey,
-                            ),
-                          )
-                        : new Text(
-                            '${item.text}',
-                            style: new TextStyle(
-                              fontSize: _fontSize,
-                            ),
-                          ),
-                    value: item.done,
-                    onChanged: (bool value) {
-                      setState(() {
-                        item.done = !item.done;
-                        _updateItems();
-                      });
-                    },
-                  )
-                : new ListTile(
-                    title: new TextField(
-                      autofocus: true,
-                      onSubmitted: (text) {
-                        setState(() {
-                          item.text = text;
-                          _updateItems();
-                        });
-                      },
-                      style: new TextStyle(
-                        color: Colors.black,
-                        fontSize: _fontSize,
+          if (item.text != null) {
+            return new Dismissible(
+              resizeDuration: const Duration(milliseconds: 10),
+              movementDuration: const Duration(milliseconds: 10),
+              background: new Container(color: Colors.blueAccent),
+              onDismissed: (direction) {
+                items.removeAt(index);
+                Scaffold.of(context).showSnackBar(
+                      new SnackBar(
+                        content: new Text('Item dismissed'),
+                        duration: const Duration(milliseconds: 1500),
                       ),
-                    ),
-                  ),
-          );
+                    );
+                _updateItems();
+              },
+              key: new ObjectKey(item),
+              child: new CheckboxListTile(
+                title: item.done
+                    ? new Text(
+                        '${item.text}',
+                        style: new TextStyle(
+                          fontSize: _fontSize,
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : new Text(
+                        '${item.text}',
+                        style: new TextStyle(
+                          fontSize: _fontSize,
+                        ),
+                      ),
+                value: item.done,
+                onChanged: (bool value) {
+                  setState(() {
+                    item.done = !item.done;
+                    _updateItems();
+                  });
+                },
+              ),
+            );
+          } else {
+            return new ListTile(
+              title: new TextField(
+                controller: myController,
+                autofocus: true,
+                onSubmitted: (text) {
+                  _addTodoItem();
+                },
+                style: new TextStyle(
+                  color: Colors.black,
+                  fontSize: _fontSize,
+                ),
+              ),
+            );
+          }
         },
       ),
       floatingActionButton: new FloatingActionButton(
