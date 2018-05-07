@@ -115,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _getNewTodoItemWidget() {
     return new ListTile(
       title: new TextField(
+        maxLines: null,
         controller: _myController,
         autofocus: true,
         onSubmitted: (text) {
