@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       items.removeWhere((i) => i.text == null);
       items.add(new TodoItem());
+      _updateItems();
     });
   }
 
