@@ -31,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _fontSize = 20.0;
   final _myController = new TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void dispose() {
@@ -46,17 +47,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    _possiblyShowHintSnackBar(context);
+    var scaffold = new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text(widget.title),
         leading: new Icon(Icons.list),
       ),
       body: new ListView.builder(
         itemCount: items.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (c, index) {
           final item = items[index];
           if (item.text != null) {
-            return _getTodoItemWidget(index, item, context);
+            return _getTodoItemWidget(index, item, c);
           } else {
             return _getNewTodoItemWidget();
           }
@@ -70,6 +73,32 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new Icon(Icons.add),
       ),
     );
+    return scaffold;
+  }
+
+  void _possiblyShowHintSnackBar(context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenSnackbar = prefs.getBool("has_seen_snackbar") ?? false;
+    if (!hasSeenSnackbar) {
+      _scaffoldKey.currentState.removeCurrentSnackBar();
+      _scaffoldKey.currentState.showSnackBar(
+        new SnackBar(
+          content: new Text('Hint: Swipe tasks to delete them!'),
+          duration: const Duration(milliseconds: 15000),
+          action: new SnackBarAction(
+            label: 'Got it!',
+            onPressed: () {
+              _acknowledgeHintSnackBar();
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+  _acknowledgeHintSnackBar() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("has_seen_snackbar", true);
   }
 
   void _addTodoItem() {
@@ -115,7 +144,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _getNewTodoItemWidget() {
     return new ListTile(
       title: new TextField(
-        maxLines: null,
+        decoration: new InputDecoration(
+          hintText: 'Enter task...',
+        ),
         controller: _myController,
         autofocus: true,
         onSubmitted: (text) {
@@ -142,6 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               items.removeAt(index);
             });
+            Scaffold.of(context).removeCurrentSnackBar();
             Scaffold.of(context).showSnackBar(
                   new SnackBar(
                     content: new Text('Task deleted'),
