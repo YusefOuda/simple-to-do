@@ -12,24 +12,84 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Simple To-Do'),
+      home: new TodoListHome(title: 'Simple To-Do'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class SettingsScreen extends StatefulWidget {
+  SettingsScreen({Key key}) : super(key: key);
+
+  @override
+  _SettingsScreenState createState() => new _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  double fontSize;
+
+  @override
+  void initState() {
+    _loadSettings();
+    super.initState();
+  }
+
+  void _loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var size = prefs.getDouble("font_size");
+    if (size != null) {
+      setState(() {
+        fontSize = size;
+      });
+    } else {
+      setState(() {
+        fontSize = 16.0;
+      });
+    }
+  }
+
+  void _updateSettings(value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setDouble("font_size", fontSize);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Settings'),
+      ),
+      body: new Slider(
+        label: 'Font size',
+        divisions: 10,
+        min: 12.0,
+        max: 22.0,
+        onChanged: (value) {
+          if (value != null) {
+            setState(() {
+              fontSize = value;
+              _updateSettings(value);
+            });
+          }
+        },
+        value: (fontSize ?? 16.0),
+      ),
+    );
+  }
+}
+
+class TodoListHome extends StatefulWidget {
+  TodoListHome({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _TodoListHomeState createState() => new _TodoListHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _TodoListHomeState extends State<TodoListHome> {
   var items = new List<TodoItem>();
 
-  final _fontSize = 20.0;
+  double _fontSize = 16.0;
   final _myController = new TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -42,7 +102,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _loadItems();
+    _loadSettings();
     super.initState();
+  }
+
+  _navigateToSettings() async {
+    var result = await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new SettingsScreen()),
+    );
+    print(result);
+    _loadSettings();
   }
 
   @override
@@ -53,6 +123,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: new AppBar(
         title: new Text(widget.title),
         leading: new Icon(Icons.list),
+        actions: <Widget>[
+          new IconButton(
+            icon: new Icon(
+              Icons.settings,
+            ),
+            onPressed: () {
+              _navigateToSettings();
+            },
+          ),
+        ],
       ),
       body: new ListView.builder(
         itemCount: items.length,
@@ -141,6 +221,17 @@ class _MyHomePageState extends State<MyHomePage> {
     prefs.setString("items", json.encode(items));
   }
 
+  _loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var fontSize;
+    fontSize = prefs.getDouble("font_size");
+    if (fontSize != null) {
+      setState(() {
+        _fontSize = fontSize;
+      });
+    }
+  }
+
   Widget _getNewTodoItemWidget() {
     return new ListTile(
       title: new TextField(
@@ -161,63 +252,65 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getTodoItemWidget(index, item, context) {
-    return new Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        new Dismissible(
-          resizeDuration: const Duration(milliseconds: 10),
-          movementDuration: const Duration(milliseconds: 10),
-          background: new Container(color: Colors.blueAccent),
-          onDismissed: (direction) {
-            setState(() {
-              items.removeAt(index);
-            });
-            Scaffold.of(context).removeCurrentSnackBar();
-            Scaffold.of(context).showSnackBar(
-                  new SnackBar(
-                    content: new Text('Task deleted'),
-                    duration: const Duration(milliseconds: 1000),
-                  ),
-                );
-            _updateItems();
-          },
-          key: new ObjectKey(item),
-          child: new CheckboxListTile(
-            secondary: new Text(
-              '${index+1}.',
-              style: new TextStyle(
-                fontSize: _fontSize,
-              ),
-            ),
-            title: item.done
-                ? new Text(
-                    '${item.text}',
-                    style: new TextStyle(
-                      fontSize: _fontSize,
-                      decoration: TextDecoration.lineThrough,
-                      color: Colors.grey,
-                    ),
-                  )
-                : new Text(
-                    '${item.text}',
-                    style: new TextStyle(
-                      fontSize: _fontSize,
-                    ),
-                  ),
-            value: item.done,
-            onChanged: (bool value) {
+    return new Card(
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Dismissible(
+            resizeDuration: const Duration(milliseconds: 10),
+            movementDuration: const Duration(milliseconds: 10),
+            background: new Container(color: Colors.blueAccent),
+            onDismissed: (direction) {
               setState(() {
-                item.done = !item.done;
-                _updateItems();
+                items.removeAt(index);
               });
+              Scaffold.of(context).removeCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                    new SnackBar(
+                      content: new Text('Task deleted'),
+                      duration: const Duration(milliseconds: 1000),
+                    ),
+                  );
+              _updateItems();
             },
+            key: new ObjectKey(item),
+            child: new CheckboxListTile(
+              secondary: new Text(
+                '${index+1}.',
+                style: new TextStyle(
+                  fontSize: _fontSize,
+                ),
+              ),
+              title: item.done
+                  ? new Text(
+                      '${item.text}',
+                      style: new TextStyle(
+                        fontSize: _fontSize,
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.grey,
+                      ),
+                    )
+                  : new Text(
+                      '${item.text}',
+                      style: new TextStyle(
+                        fontSize: _fontSize,
+                      ),
+                    ),
+              value: item.done,
+              onChanged: (bool value) {
+                setState(() {
+                  item.done = !item.done;
+                  _updateItems();
+                });
+              },
+            ),
           ),
-        ),
-        new Divider(
-          height: 2.0,
-        ),
-      ],
+          new Divider(
+            height: 2.0,
+          ),
+        ],
+      ),
     );
   }
 }
