@@ -30,30 +30,58 @@ class _MyHomePageState extends State<MyHomePage> {
   var items = new List<TodoItem>();
 
   final _fontSize = 20.0;
-  final myController = new TextEditingController();
+  final _myController = new TextEditingController();
 
   @override
   void dispose() {
-    myController.dispose();
+    _myController.dispose();
     super.dispose();
-  }
-
-  void _addTodoItem() {
-    setState(() {
-      if (myController.text != null && myController.text.isNotEmpty) {
-        items.add(new TodoItem(text: myController.text));
-        myController.clear();
-      }
-      items.removeWhere((i) => i.text == null);
-      items.add(new TodoItem());
-      _updateItems();
-    });
   }
 
   @override
   void initState() {
     _loadItems();
     super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text(widget.title),
+        leading: new Icon(Icons.list),
+      ),
+      body: new ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          if (item.text != null) {
+            return _getTodoItemWidget(index, item, context);
+          } else {
+            return _getNewTodoItemWidget();
+          }
+        },
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: () {
+          _addTodoItem();
+        },
+        tooltip: 'Add Task',
+        child: new Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _addTodoItem() {
+    setState(() {
+      if (_myController.text != null && _myController.text.isNotEmpty) {
+        items.add(new TodoItem(text: _myController.text));
+        _myController.clear();
+      }
+      items.removeWhere((i) => i.text == null);
+      items.add(new TodoItem());
+      _updateItems();
+    });
   }
 
   _loadItems() async {
@@ -84,79 +112,79 @@ class _MyHomePageState extends State<MyHomePage> {
     prefs.setString("items", json.encode(items));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
-      body: new ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          if (item.text != null) {
-            return new Dismissible(
-              resizeDuration: const Duration(milliseconds: 10),
-              movementDuration: const Duration(milliseconds: 10),
-              background: new Container(color: Colors.blueAccent),
-              onDismissed: (direction) {
-                items.removeAt(index);
-                Scaffold.of(context).showSnackBar(
-                      new SnackBar(
-                        content: new Text('Item dismissed'),
-                        duration: const Duration(milliseconds: 1500),
-                      ),
-                    );
-                _updateItems();
-              },
-              key: new ObjectKey(item),
-              child: new CheckboxListTile(
-                title: item.done
-                    ? new Text(
-                        '${item.text}',
-                        style: new TextStyle(
-                          fontSize: _fontSize,
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                        ),
-                      )
-                    : new Text(
-                        '${item.text}',
-                        style: new TextStyle(
-                          fontSize: _fontSize,
-                        ),
-                      ),
-                value: item.done,
-                onChanged: (bool value) {
-                  setState(() {
-                    item.done = !item.done;
-                    _updateItems();
-                  });
-                },
-              ),
-            );
-          } else {
-            return new ListTile(
-              title: new TextField(
-                controller: myController,
-                autofocus: true,
-                onSubmitted: (text) {
-                  _addTodoItem();
-                },
-                style: new TextStyle(
-                  color: Colors.black,
-                  fontSize: _fontSize,
-                ),
-              ),
-            );
-          }
+  Widget _getNewTodoItemWidget() {
+    return new ListTile(
+      title: new TextField(
+        controller: _myController,
+        autofocus: true,
+        onSubmitted: (text) {
+          _addTodoItem();
         },
+        style: new TextStyle(
+          color: Colors.black,
+          fontSize: _fontSize,
+        ),
       ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _addTodoItem,
-        tooltip: 'Add Item',
-        child: new Icon(Icons.add),
-      ),
+    );
+  }
+
+  Widget _getTodoItemWidget(index, item, context) {
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Dismissible(
+          resizeDuration: const Duration(milliseconds: 10),
+          movementDuration: const Duration(milliseconds: 10),
+          background: new Container(color: Colors.blueAccent),
+          onDismissed: (direction) {
+            setState(() {
+              items.removeAt(index);
+            });
+            Scaffold.of(context).showSnackBar(
+                  new SnackBar(
+                    content: new Text('Task deleted'),
+                    duration: const Duration(milliseconds: 1000),
+                  ),
+                );
+            _updateItems();
+          },
+          key: new ObjectKey(item),
+          child: new CheckboxListTile(
+            secondary: new Text(
+              '${index+1}.',
+              style: new TextStyle(
+                fontSize: _fontSize,
+              ),
+            ),
+            title: item.done
+                ? new Text(
+                    '${item.text}',
+                    style: new TextStyle(
+                      fontSize: _fontSize,
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
+                    ),
+                  )
+                : new Text(
+                    '${item.text}',
+                    style: new TextStyle(
+                      fontSize: _fontSize,
+                    ),
+                  ),
+            value: item.done,
+            onChanged: (bool value) {
+              setState(() {
+                item.done = !item.done;
+                _updateItems();
+              });
+            },
+          ),
+        ),
+        new Divider(
+          height: 2.0,
+        ),
+      ],
     );
   }
 }
