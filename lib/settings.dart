@@ -5,7 +5,7 @@ class SettingsScreen extends StatefulWidget {
   SettingsScreen({Key key}) : super(key: key);
 
   @override
-  _SettingsScreenState createState() => new _SettingsScreenState();
+  _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
@@ -38,33 +38,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Settings'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Settings'),
       ),
       backgroundColor: Theme.of(context).backgroundColor,
-      body: new Padding(
-        padding: new EdgeInsets.only(
+      body: Padding(
+        padding: EdgeInsets.only(
           left: 10.0,
           top: 20.0,
           right: 10.0,
         ),
-        child: new Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                new Text(
+                Text(
                   'Font size',
-                  style: new TextStyle(
+                  style: TextStyle(
                     fontSize: fontSize,
                   ),
                 ),
-                new Expanded(
-                  child: new Slider(
+                Expanded(
+                  child: Slider(
                     divisions: 10,
                     min: 16.0,
                     max: 26.0,

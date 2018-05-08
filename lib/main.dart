@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Simple To-Do',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.indigo,
         accentColor: Colors.pink,
         backgroundColor: Colors.grey[100],
         cardColor: Colors.white,
       ),
-      home: new TodoListHome(title: 'Simple To-Do'),
+      home: TodoListHome(title: 'Simple To-Do'),
     );
   }
 }
@@ -27,15 +27,15 @@ class TodoListHome extends StatefulWidget {
   final String title;
 
   @override
-  _TodoListHomeState createState() => new _TodoListHomeState();
+  _TodoListHomeState createState() => _TodoListHomeState();
 }
 
 class _TodoListHomeState extends State<TodoListHome> {
-  var items = new List<TodoItem>();
+  var items = List<TodoItem>();
 
   double _fontSize = 16.0;
-  final _myController = new TextEditingController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final _myController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void dispose() {
@@ -53,7 +53,7 @@ class _TodoListHomeState extends State<TodoListHome> {
   _navigateToSettings() async {
     var result = await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => new SettingsScreen()),
+      MaterialPageRoute(builder: (context) => SettingsScreen()),
     );
     var tmp = result; // just need to access result to block
     _loadSettings();
@@ -62,14 +62,14 @@ class _TodoListHomeState extends State<TodoListHome> {
   @override
   Widget build(BuildContext context) {
     _possiblyShowHintSnackBar(context);
-    var scaffold = new Scaffold(
+    var scaffold = Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text(widget.title),
+      appBar: AppBar(
+        title: Text(widget.title),
         actions: <Widget>[
-          new IconButton(
-            icon: new Icon(
+          IconButton(
+            icon: Icon(
               Icons.settings,
             ),
             onPressed: () {
@@ -78,7 +78,7 @@ class _TodoListHomeState extends State<TodoListHome> {
           ),
         ],
       ),
-      body: new ListView.builder(
+      body: ListView.builder(
         itemCount: items.length,
         itemBuilder: (c, index) {
           final item = items[index];
@@ -89,12 +89,12 @@ class _TodoListHomeState extends State<TodoListHome> {
           }
         },
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           _addTodoItem();
         },
         tooltip: 'Add Task',
-        child: new Icon(Icons.add),
+        child: Icon(Icons.add),
         backgroundColor: Theme.of(context).accentColor,
       ),
     );
@@ -107,10 +107,10 @@ class _TodoListHomeState extends State<TodoListHome> {
     if (!hasSeenSnackbar) {
       _scaffoldKey.currentState.removeCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
-        new SnackBar(
-          content: new Text('Hint: Swipe tasks to delete them!'),
+        SnackBar(
+          content: Text('Hint: Swipe tasks to delete them!'),
           duration: const Duration(milliseconds: 35000),
-          action: new SnackBarAction(
+          action: SnackBarAction(
             label: 'Got it!',
             onPressed: () {
               _acknowledgeHintSnackBar();
@@ -129,11 +129,11 @@ class _TodoListHomeState extends State<TodoListHome> {
   void _addTodoItem() {
     setState(() {
       if (_myController.text != null && _myController.text.isNotEmpty) {
-        items.add(new TodoItem(text: _myController.text));
+        items.add(TodoItem(text: _myController.text));
         _myController.clear();
       }
       items.removeWhere((i) => i.text == null);
-      items.add(new TodoItem());
+      items.add(TodoItem());
       _updateItems();
     });
   }
@@ -146,7 +146,7 @@ class _TodoListHomeState extends State<TodoListHome> {
     } catch (Exception) {
       print('couldnt decode json');
       setState(() {
-        items.add(new TodoItem());
+        items.add(TodoItem());
       });
       return;
     }
@@ -178,10 +178,10 @@ class _TodoListHomeState extends State<TodoListHome> {
   }
 
   Widget _getNewTodoItemWidget() {
-    return new Card(
-      child: new ListTile(
-        title: new TextField(
-          decoration: new InputDecoration(
+    return Card(
+      child: ListTile(
+        title: TextField(
+          decoration: InputDecoration(
             hintText: 'Enter task...',
           ),
           controller: _myController,
@@ -189,7 +189,7 @@ class _TodoListHomeState extends State<TodoListHome> {
           onSubmitted: (text) {
             _addTodoItem();
           },
-          style: new TextStyle(
+          style: TextStyle(
             color: Colors.black,
             fontSize: _fontSize,
           ),
@@ -199,13 +199,13 @@ class _TodoListHomeState extends State<TodoListHome> {
   }
 
   Widget _getTodoItemWidget(index, item, context) {
-    return new InkWell(
-      child: new Card(
-        child: new Column(
+    return InkWell(
+      child: Card(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new Dismissible(
+            Dismissible(
               resizeDuration: const Duration(milliseconds: 10),
               movementDuration: const Duration(milliseconds: 10),
               onDismissed: (direction) {
@@ -215,10 +215,10 @@ class _TodoListHomeState extends State<TodoListHome> {
                 });
                 Scaffold.of(context).removeCurrentSnackBar();
                 Scaffold.of(context).showSnackBar(
-                      new SnackBar(
-                        content: new Text('Task deleted'),
+                      SnackBar(
+                        content: Text('Task deleted'),
                         duration: const Duration(milliseconds: 4000),
-                        action: new SnackBarAction(
+                        action: SnackBarAction(
                           label: 'Undo',
                           onPressed: () {
                             if (removedItem != null) {
@@ -232,26 +232,26 @@ class _TodoListHomeState extends State<TodoListHome> {
                     );
                 _updateItems();
               },
-              key: new ObjectKey(item),
-              child: new CheckboxListTile(
-                secondary: new Text(
+              key: ObjectKey(item),
+              child: CheckboxListTile(
+                secondary: Text(
                   '${index+1}.',
-                  style: new TextStyle(
+                  style: TextStyle(
                     fontSize: _fontSize,
                   ),
                 ),
                 title: item.done
-                    ? new Text(
+                    ? Text(
                         '${item.text}',
-                        style: new TextStyle(
+                        style: TextStyle(
                           fontSize: _fontSize,
                           decoration: TextDecoration.lineThrough,
                           color: Colors.grey,
                         ),
                       )
-                    : new Text(
+                    : Text(
                         '${item.text}',
-                        style: new TextStyle(
+                        style: TextStyle(
                           fontSize: _fontSize,
                         ),
                       ),
@@ -264,7 +264,7 @@ class _TodoListHomeState extends State<TodoListHome> {
                 },
               ),
             ),
-            new Divider(
+            Divider(
               height: 2.0,
             ),
           ],
