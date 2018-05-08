@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'settings.dart';
 
 void main() => runApp(new MyApp());
 
@@ -13,66 +14,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: new TodoListHome(title: 'Simple To-Do'),
-    );
-  }
-}
-
-class SettingsScreen extends StatefulWidget {
-  SettingsScreen({Key key}) : super(key: key);
-
-  @override
-  _SettingsScreenState createState() => new _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  double fontSize;
-
-  @override
-  void initState() {
-    _loadSettings();
-    super.initState();
-  }
-
-  void _loadSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var size = prefs.getDouble("font_size");
-    if (size != null) {
-      setState(() {
-        fontSize = size;
-      });
-    } else {
-      setState(() {
-        fontSize = 16.0;
-      });
-    }
-  }
-
-  void _updateSettings(value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setDouble("font_size", fontSize);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Settings'),
-      ),
-      body: new Slider(
-        label: 'Font size',
-        divisions: 10,
-        min: 12.0,
-        max: 22.0,
-        onChanged: (value) {
-          if (value != null) {
-            setState(() {
-              fontSize = value;
-              _updateSettings(value);
-            });
-          }
-        },
-        value: (fontSize ?? 16.0),
-      ),
     );
   }
 }
@@ -111,7 +52,7 @@ class _TodoListHomeState extends State<TodoListHome> {
       context,
       new MaterialPageRoute(builder: (context) => new SettingsScreen()),
     );
-    print(result);
+    var tmp = result; // just need to access result to block
     _loadSettings();
   }
 
