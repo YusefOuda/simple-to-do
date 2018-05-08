@@ -63,7 +63,6 @@ class _TodoListHomeState extends State<TodoListHome> {
       key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text(widget.title),
-        leading: new Icon(Icons.list),
         actions: <Widget>[
           new IconButton(
             icon: new Icon(
@@ -201,7 +200,6 @@ class _TodoListHomeState extends State<TodoListHome> {
           new Dismissible(
             resizeDuration: const Duration(milliseconds: 10),
             movementDuration: const Duration(milliseconds: 10),
-            background: new Container(color: Colors.blueAccent),
             onDismissed: (direction) {
               var removedItem;
               setState(() {
