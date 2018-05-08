@@ -164,7 +164,7 @@ class _TodoListHomeState extends State<TodoListHome> {
       _scaffoldKey.currentState.showSnackBar(
         new SnackBar(
           content: new Text('Hint: Swipe tasks to delete them!'),
-          duration: const Duration(milliseconds: 15000),
+          duration: const Duration(milliseconds: 35000),
           action: new SnackBarAction(
             label: 'Got it!',
             onPressed: () {
@@ -262,14 +262,25 @@ class _TodoListHomeState extends State<TodoListHome> {
             movementDuration: const Duration(milliseconds: 10),
             background: new Container(color: Colors.blueAccent),
             onDismissed: (direction) {
+              var removedItem;
               setState(() {
-                items.removeAt(index);
+                removedItem = items.removeAt(index);
               });
               Scaffold.of(context).removeCurrentSnackBar();
               Scaffold.of(context).showSnackBar(
                     new SnackBar(
                       content: new Text('Task deleted'),
-                      duration: const Duration(milliseconds: 1000),
+                      duration: const Duration(milliseconds: 4000),
+                      action: new SnackBarAction(
+                        label: 'Undo',
+                        onPressed: () {
+                          if (removedItem != null) {
+                            setState(() {
+                              items.insert(index, removedItem);
+                            });
+                          }
+                        },
+                      ),
                     ),
                   );
               _updateItems();
