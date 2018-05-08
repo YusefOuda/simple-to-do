@@ -42,6 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: new AppBar(
         title: new Text('Settings'),
       ),
+      backgroundColor: Theme.of(context).backgroundColor,
       body: new Padding(
         padding: new EdgeInsets.only(
           left: 10.0,

@@ -11,7 +11,10 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Simple To-Do',
       theme: new ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
+        accentColor: Colors.pink,
+        backgroundColor: Colors.grey[100],
+        cardColor: Colors.white,
       ),
       home: new TodoListHome(title: 'Simple To-Do'),
     );
@@ -60,6 +63,7 @@ class _TodoListHomeState extends State<TodoListHome> {
   Widget build(BuildContext context) {
     _possiblyShowHintSnackBar(context);
     var scaffold = new Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
       key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text(widget.title),
@@ -91,6 +95,7 @@ class _TodoListHomeState extends State<TodoListHome> {
         },
         tooltip: 'Add Task',
         child: new Icon(Icons.add),
+        backgroundColor: Theme.of(context).accentColor,
       ),
     );
     return scaffold;
@@ -173,93 +178,97 @@ class _TodoListHomeState extends State<TodoListHome> {
   }
 
   Widget _getNewTodoItemWidget() {
-    return new ListTile(
-      title: new TextField(
-        decoration: new InputDecoration(
-          hintText: 'Enter task...',
-        ),
-        controller: _myController,
-        autofocus: true,
-        onSubmitted: (text) {
-          _addTodoItem();
-        },
-        style: new TextStyle(
-          color: Colors.black,
-          fontSize: _fontSize,
+    return new Card(
+      child: new ListTile(
+        title: new TextField(
+          decoration: new InputDecoration(
+            hintText: 'Enter task...',
+          ),
+          controller: _myController,
+          autofocus: true,
+          onSubmitted: (text) {
+            _addTodoItem();
+          },
+          style: new TextStyle(
+            color: Colors.black,
+            fontSize: _fontSize,
+          ),
         ),
       ),
     );
   }
 
   Widget _getTodoItemWidget(index, item, context) {
-    return new Card(
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Dismissible(
-            resizeDuration: const Duration(milliseconds: 10),
-            movementDuration: const Duration(milliseconds: 10),
-            onDismissed: (direction) {
-              var removedItem;
-              setState(() {
-                removedItem = items.removeAt(index);
-              });
-              Scaffold.of(context).removeCurrentSnackBar();
-              Scaffold.of(context).showSnackBar(
-                    new SnackBar(
-                      content: new Text('Task deleted'),
-                      duration: const Duration(milliseconds: 4000),
-                      action: new SnackBarAction(
-                        label: 'Undo',
-                        onPressed: () {
-                          if (removedItem != null) {
-                            setState(() {
-                              items.insert(index, removedItem);
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  );
-              _updateItems();
-            },
-            key: new ObjectKey(item),
-            child: new CheckboxListTile(
-              secondary: new Text(
-                '${index+1}.',
-                style: new TextStyle(
-                  fontSize: _fontSize,
-                ),
-              ),
-              title: item.done
-                  ? new Text(
-                      '${item.text}',
-                      style: new TextStyle(
-                        fontSize: _fontSize,
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.grey,
-                      ),
-                    )
-                  : new Text(
-                      '${item.text}',
-                      style: new TextStyle(
-                        fontSize: _fontSize,
-                      ),
-                    ),
-              value: item.done,
-              onChanged: (bool value) {
+    return new InkWell(
+      child: new Card(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Dismissible(
+              resizeDuration: const Duration(milliseconds: 10),
+              movementDuration: const Duration(milliseconds: 10),
+              onDismissed: (direction) {
+                var removedItem;
                 setState(() {
-                  item.done = !item.done;
-                  _updateItems();
+                  removedItem = items.removeAt(index);
                 });
+                Scaffold.of(context).removeCurrentSnackBar();
+                Scaffold.of(context).showSnackBar(
+                      new SnackBar(
+                        content: new Text('Task deleted'),
+                        duration: const Duration(milliseconds: 4000),
+                        action: new SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            if (removedItem != null) {
+                              setState(() {
+                                items.insert(index, removedItem);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    );
+                _updateItems();
               },
+              key: new ObjectKey(item),
+              child: new CheckboxListTile(
+                secondary: new Text(
+                  '${index+1}.',
+                  style: new TextStyle(
+                    fontSize: _fontSize,
+                  ),
+                ),
+                title: item.done
+                    ? new Text(
+                        '${item.text}',
+                        style: new TextStyle(
+                          fontSize: _fontSize,
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : new Text(
+                        '${item.text}',
+                        style: new TextStyle(
+                          fontSize: _fontSize,
+                        ),
+                      ),
+                value: item.done,
+                onChanged: (bool value) {
+                  setState(() {
+                    item.done = !item.done;
+                    _updateItems();
+                  });
+                },
+              ),
             ),
-          ),
-          new Divider(
-            height: 2.0,
-          ),
-        ],
+            new Divider(
+              height: 2.0,
+            ),
+          ],
+        ),
       ),
     );
   }
