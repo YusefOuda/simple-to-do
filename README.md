@@ -1,8 +1,6 @@
 # todo_app
 
-A simple to-do app using Flutter
-
-# [Google Play Store](https://play.google.com/store/apps/details?id=com.yusefouda.todoapp)
+A to-do app using the Flutter framework
 
 ## Getting Started
 
